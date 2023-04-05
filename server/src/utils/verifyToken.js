@@ -1,7 +1,8 @@
 import { verify } from "jsonwebtoken";
 
 const verifyToken = (request, response, next) => {
-  const authHeader = request.headers["authorization"];
+  const authHeader =
+    request.headers["authorization"] || request.body.refreshToken;
   if (authHeader) {
     const token = authHeader.split(" ")[1];
 

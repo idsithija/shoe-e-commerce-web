@@ -6,6 +6,7 @@ import {
   generateAccessToken,
   generateRefreshToken,
 } from "../utils/generateToken";
+import { verify } from "jsonwebtoken";
 
 var identityService = Router();
 
@@ -55,13 +56,41 @@ identityService.post("/login", async (request, response, next) => {
       if (originalPassword !== body.password) {
         response.status(401).json({ message: "Wrong password or username!" });
       } else {
-        const accessToken = generateAccessToken(userExist);
-        const refreshToken = generateRefreshToken(userExist);
+        const accessToken = generateAccessToken(userExist._id);
+        const refreshToken = generateRefreshToken(userExist._id);
 
         response
           .status(200)
           .json({ name: userExist.name, accessToken, refreshToken });
       }
+    }
+  } catch {
+    next(error);
+  }
+});
+
+identityService.post("/refreshToken", async (request, response, next) => {
+  try {
+    const body = request.body;
+
+    const valid = verify(
+      body.refreshToken,
+      process.env.REFRESH_TOKEN_SECRET_KEY,
+      (err, user) => {
+        if (user) {
+          return (request.user = user);
+        } else {
+          return false;
+        }
+      }
+    );
+
+    if (valid) {
+      const accessToken = generateAccessToken(valid.id);
+      const refreshToken = generateRefreshToken(valid.id);
+      response.status(200).json({ accessToken, refreshToken });
+    } else {
+      response.status(403).json("You are not authenticated!");
     }
   } catch {
     next(error);
