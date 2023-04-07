@@ -5,6 +5,7 @@ import * as logger from "./utils/logger";
 import mongoose from "mongoose";
 import identityService from "./controllers/identityService";
 import {
+  activityLogger,
   errorHandler,
   requestLogger,
   unknownEndpoint,
@@ -23,6 +24,7 @@ const app = express();
 app.use(cors());
 app.use(json());
 app.use(requestLogger);
+app.use(activityLogger);
 
 app.use("/api", identityService);
 

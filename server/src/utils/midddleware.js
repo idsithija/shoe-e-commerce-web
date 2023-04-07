@@ -1,3 +1,4 @@
+import users from "../models/users";
 import * as logger from "./logger";
 
 const requestLogger = (request, response, next) => {
@@ -22,4 +23,22 @@ const errorHandler = (error, request, response, next) => {
   next(error);
 };
 
-export { requestLogger, unknownEndpoint, errorHandler };
+const activityLogger = async (request, response, next) => {
+  const authHeader = request.headers["authorization"];
+  const body = request.body;
+
+  let activityLogData = {
+    userId: "",
+    apiEndPoint: request.path,
+  };
+
+  if (authHeader) {
+  } else {
+    const userExist = await users.findOne({ email: body.email });
+    activityLogData.userId = userExist._id;
+  }
+
+  next();
+};
+
+export { requestLogger, unknownEndpoint, errorHandler, activityLogger };
